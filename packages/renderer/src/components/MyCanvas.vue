@@ -24,9 +24,35 @@ const draw = () => {
   ctx.fillRect(0,0,70,75);
 };
 
+const whoClick = () => {
+  let mouse = { x: 0, y: 0 }; // 存储鼠标位置信息
+
+  if (canvasRef.value == undefined)
+  {
+    return;
+  }
+  
+  canvasRef.value.addEventListener('mousedown', e => {
+    let x = e.pageX;
+    let y = e.pageY;
+
+    if (canvasRef.value == undefined)
+    {
+      return;
+    }
+    
+    // 计算鼠标在canvas画布中的相对位置
+    mouse.x = x - canvasRef.value.offsetLeft;
+    mouse.y = y - canvasRef.value.offsetTop;
+
+    console.log('x:',mouse.x,'y',mouse.y);
+  });
+};
+
 onMounted(()=>{
   initContext();
   draw();
+  whoClick();
 });
 
 </script>
@@ -34,9 +60,9 @@ onMounted(()=>{
 <template>
   <canvas
     ref="canvasRef"
-    style="width: 100%; border-style: solid; border-width: 1px"
-    :width="200"
-    :height="200"
+    style="border-style: solid; border-width: 1px"
+    width="200"
+    height="200"
   >
     浏览器不支持canvas
   </canvas>

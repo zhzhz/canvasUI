@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Style ref.Path="//*.buttonBackground">
+  <att.Color-bind>
+    <![CDATA[
+      cast Color let state = self.State in (
+        not self.VisuallyEnabled ? "#252526" :
+        state == ButtonState::Active ? "#54545C" :
+        state == ButtonState::Pressed ? "#007ACC" :
+        "#3F3F46"
+      )
+    ]]>
+  </att.Color-bind>
+</Style>
+<Style ref.Path="//*.buttonBorder">
+  <att.Color-bind>
+    <![CDATA[
+      cast Color let state = self.State in (
+        not self.VisuallyEnabled ? "#434346" :
+        state == ButtonState::Active ? "#6A6A75" :
+        state == ButtonState::Pressed ? "#1C97EA" :
+        "#54545C"
+      )
+    ]]>
+  </att.Color-bind>
+</Style>
+<Style ref.Path="//*.buttonText">
+  <att.Color-bind>
+    <![CDATA[
+      cast Color let state = self.State in (
+        not self.VisuallyEnabled ? "#6D6D6D" :
+        state == ButtonState::Active ? "#F1F1F1" :
+        state == ButtonState::Pressed ? "#FFFFFF" :
+        "#F1F1F1"
+      )
+    ]]>
+  </att.Color-bind>
+</Style>

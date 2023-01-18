@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import {ref, onMounted} from 'vue';
 
+import {xml2js} from '#preload';
+
 const canvasRef = ref<HTMLCanvasElement>();
 let ctx:CanvasRenderingContext2D | null = null;
 
@@ -53,6 +55,10 @@ onMounted(()=>{
   initContext();
   draw();
   whoClick();
+
+  console.log(xml2js('main.xml'));
+  console.log(xml2js('ButtonTemplate.xml'));
+  console.log(xml2js('BlackStyle.xml'));
 });
 
 </script>

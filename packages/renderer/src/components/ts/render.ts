@@ -22,7 +22,7 @@ export function render(root:any, canvas:HTMLCanvasElement|undefined, ctx:CanvasR
 //只考虑window下的元素
 function startRender(layoutTree:any)
 {
-    console.log('layoutTree',layoutTree);
+    //console.log('layoutTree',layoutTree);
     const children = layoutTree.children;
 
     for (let i = 0; i < children.length; i++)
@@ -157,7 +157,7 @@ function drawContainerComposition(parent:any, child:any)
 
     child.InternalMargin = InternalMargin;
 
-    console.log(InternalMargin);
+    //console.log(InternalMargin);
 
     const rect = layout(parent, child);
     rect.draw = drawRect;

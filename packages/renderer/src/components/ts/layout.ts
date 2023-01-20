@@ -121,7 +121,7 @@ function layoutAlignmentAndPreferred(parentItem:any,
         }
     }
 
-    console.log('button',left,top,width,height);
+    //console.log('button',left,top,width,height);
     return {left, top, width, height};
 }
 

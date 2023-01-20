@@ -3,6 +3,8 @@ import {ref, onMounted} from 'vue';
 
 import {xml2js} from '#preload';
 
+import {render} from './ts/render';
+
 const canvasRef = ref<HTMLCanvasElement>();
 let ctx:CanvasRenderingContext2D | null = null;
 
@@ -15,16 +17,16 @@ const initContext = () => {
   ctx = canvasRef.value.getContext('2d');
 };
 
-const draw = () => {
+// const draw = () => {
 
-  if (ctx == null)
-  {
-    return;
-  }
+//   if (ctx == null)
+//   {
+//     return;
+//   }
   
-  ctx.fillStyle='#FF0000';
-  ctx.fillRect(0,0,70,75);
-};
+//   ctx.fillStyle='#FF0000';
+//   ctx.fillRect(0,0,70,75);
+// };
 
 const whoClick = () => {
   let mouse = { x: 0, y: 0 }; // 存储鼠标位置信息
@@ -53,12 +55,13 @@ const whoClick = () => {
 
 onMounted(()=>{
   initContext();
-  draw();
+  //draw();
   whoClick();
 
-  console.log(xml2js('main.xml'));
-  console.log(xml2js('ButtonTemplate.xml'));
-  console.log(xml2js('BlackStyle.xml'));
+  //console.log(xml2js('main.xml'));
+  render(xml2js('main.xml'), canvasRef.value, ctx);
+  //console.log(xml2js('ButtonTemplate.xml'));
+  //console.log(xml2js('BlackStyle.xml'));
 });
 
 </script>

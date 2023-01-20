@@ -183,7 +183,7 @@ function drawButton(parent:any, child:any)
 }
 
 
-//渲染window中的可视元素
+//布局window中的可视元素
 function layoutElements(window:any, elements:Array<any>)
 {
     //暂时不支持修改canvas大小

@@ -7,6 +7,7 @@ const layoutFuncMap = new Map();
 
 layoutFuncMap.set('att.ContainerComposition-set', layoutContainerComposition);
 layoutFuncMap.set('Button', layoutButton);
+layoutFuncMap.set('Bounds', layoutBounds);
 
 //布局window和InternalMargin
 function layoutInternalMargin(parentItem:any, childItem:any)
@@ -133,6 +134,8 @@ function layoutContainerComposition(parentItem:any, childItem:any)
     parentItem.children.push(rect);
     parentItem.containerComposition = rect;
 
+    xml2renderMap.set(childItem, rect);
+
     return rect;
 }
 
@@ -145,7 +148,16 @@ function layoutButton(parentItem:any, childItem:any)
 
     parentItem.children.push(rect);
 
+    xml2renderMap.set(childItem, rect);
+
     return rect;
+}
+
+//计算出Bounds的范围
+function layoutBounds(parentItem:any, childItem:any)
+{
+    console.log('layoutBounds', parentItem, childItem);
+    return layoutInternalMargin(parentItem, childItem.AlignmentToParent);
 }
 
 export function layout(parentLayoutItem:any, childLayoutItem:any)
@@ -153,9 +165,11 @@ export function layout(parentLayoutItem:any, childLayoutItem:any)
     //根据父矩形布局
     //返回布局后的新矩形
     const parentItem = xml2renderMap.get(parentLayoutItem);
+    //console.log(parentItem)
     if (parentItem)
     {
         const layoutFunc = layoutFuncMap.get(childLayoutItem.name);
+        //console.log(layoutFunc)
         if (layoutFunc)
         {
             return layoutFunc(parentItem, childLayoutItem);

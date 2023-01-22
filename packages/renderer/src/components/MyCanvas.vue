@@ -28,35 +28,12 @@ const initContext = () => {
 //   ctx.fillRect(0,0,70,75);
 // };
 
-const whoClick = () => {
-  let mouse = { x: 0, y: 0 }; // 存储鼠标位置信息
 
-  if (canvasRef.value == undefined)
-  {
-    return;
-  }
-  
-  canvasRef.value.addEventListener('mousedown', e => {
-    let x = e.pageX;
-    let y = e.pageY;
-
-    if (canvasRef.value == undefined)
-    {
-      return;
-    }
-    
-    // 计算鼠标在canvas画布中的相对位置
-    mouse.x = x - canvasRef.value.offsetLeft;
-    mouse.y = y - canvasRef.value.offsetTop;
-
-    console.log('x:',mouse.x,'y',mouse.y);
-  });
-};
 
 onMounted(()=>{
   initContext();
   //draw();
-  whoClick();
+  //whoClick();
 
   //console.log(xml2js('main.xml'));
   render(xml2js('main.xml'), canvasRef.value, ctx);

@@ -1,3 +1,6 @@
+import {getID, initUpControlArray, fillUpControlArray, setId2renderTree} from './global';
+
+
 //在本文件中构建渲染树
 const renderTree:any = {width:0, height:0, left:0, top:0, children:[]};
 
@@ -186,6 +189,14 @@ export function setRootLayout(window:any)
     renderTree.height = window.height;
     renderTree.left = 0;
     renderTree.top = 0;
+
+    renderTree.id = getID();
+
+    setId2renderTree(renderTree.id, renderTree);
+
+    initUpControlArray(window.width, window.height);
+
+    fillUpControlArray(renderTree.left, renderTree.top, window.width, window.height, renderTree.id);
 
     xml2renderMap.set(window, renderTree);
 }

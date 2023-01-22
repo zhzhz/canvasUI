@@ -1,9 +1,83 @@
 
 import {setRootLayout, layout, getLayoutTree} from './layout';
+import {getID, fillUpControlArray, getControlID, id2renderTree, setId2renderTree} from './global';
 
 import {xml2js} from '#preload';
 
 let drawCtx:CanvasRenderingContext2D | null = null;
+
+const whoClick = (canvas:any) => {
+    const mouse = { x: 0, y: 0 }; // 存储鼠标位置信息
+  
+    if (canvas == undefined)
+    {
+      return;
+    }
+
+    function calcMouse(e:any)
+    {
+        const x = e.pageX;
+        const y = e.pageY;
+    
+        if (canvas == undefined)
+        {
+          return;
+        }
+        
+        // 计算鼠标在canvas画布中的相对位置
+        mouse.x = x - canvas.offsetLeft;
+        mouse.y = y - canvas.offsetTop;
+    }
+    
+    canvas.addEventListener('mousedown', (e:any) => {
+        calcMouse(e);
+        //console.log('x:',mouse.x,'y',mouse.y);
+        handleMouseDown(mouse);
+    });
+
+    canvas.addEventListener('mouseup', (e:any) => {
+        calcMouse(e);
+        handleMouseUp(mouse);
+    });
+};
+
+function handleMouseUp(mouse:any)
+{
+    //console.log('x:',mouse.x,'y',mouse.y);
+    //如果按钮处于按下状态，将鼠标状态重新置为普通状态
+    //查找按下的是哪个控件
+    const controlID = getControlID(mouse);
+    //console.log(controlID);
+
+    //根据控件id得到控件渲染树节点
+    const renderTreeNode = id2renderTree(controlID);
+
+    //console.log(renderTreeNode);
+    if (renderTreeNode.mouseup)
+    {
+        if (renderTreeNode.buttonState.buttonState == ButtonState.Down)
+        {
+            renderTreeNode.mouseup();
+        }
+    }
+}
+
+function handleMouseDown(mouse:any)
+{
+    //鼠标按下，更新按钮的显示状态
+    //查找按下的是哪个控件
+    const controlID = getControlID(mouse);
+    //console.log(controlID);
+
+    //根据控件id得到控件渲染树节点
+    const renderTreeNode = id2renderTree(controlID);
+
+    //console.log(renderTreeNode);
+    if (renderTreeNode.mousedown)
+    {
+        renderTreeNode.mousedown();
+    }
+}
 
 export function render(root:any, canvas:HTMLCanvasElement|undefined, ctx:CanvasRenderingContext2D | null) {
     console.log('render func');
@@ -16,6 +90,8 @@ export function render(root:any, canvas:HTMLCanvasElement|undefined, ctx:CanvasR
     layoutWindow(window, canvas);
 
     layoutElements(window, window.elements);
+
+    whoClick(canvas);
 
     startRender(getLayoutTree());
 }
@@ -170,6 +246,13 @@ renderMap.set('Button', layoutButton);
 
 function drawLayoutRect(rect:any)
 {
+    //如果是按钮，则操作fillUpControlArray
+    //console.log("drawLayoutRect", rect);
+    if (rect.buttonState)
+    {
+        fillUpControlArray(rect.left, rect.top, rect.width, rect.height, rect.id);
+    }
+
     if (drawCtx == null)
     {
         return;
@@ -198,6 +281,57 @@ function layoutContainerComposition(parent:any, child:any)
     rect.draw = drawLayoutRect;
 }
 
+enum ButtonState
+{
+    Init,
+    Down,
+}
+
+//处理按钮状态改变
+function stateChangedHandle(info:any)
+{
+    //console.log("stateChangedHandle", info);
+    //遍历do，依次处理
+    for (let i = 0; i < info.do.length; i++)
+    {
+        const doWork = info.do[i];
+
+        if (doWork.type == 'color')
+        {
+            //处理color更新
+            const color = style(info.buttonState.buttonState, doWork.index);
+            //console.log("stateChangedHandle color", color);
+            //更新渲染树的color
+            doWork.color.color = color;
+        }
+    }
+
+    //手动调用更新界面函数
+    startRender(getLayoutTree());
+}
+
+//用于按钮界面更新
+// function DoWork(type:String, index:String, color:Object)
+// {
+//     this.type = type;
+//     this.index = index;
+//     this.color = color;
+// }
+
+class DoWork
+{
+    type:any;
+    index:any;
+    color:any;
+
+    constructor(type:any, index:any, color:any)
+    {
+        this.type = type;
+        this.index = index;
+        this.color = color;
+    }
+}
+
 function layoutButton(parent:any, button:any)
 {
     //console.log("drawButton");
@@ -215,6 +349,61 @@ function layoutButton(parent:any, button:any)
 
     const rect = layout(parent, button);
 
+    ////////////////////////////////////
+
+    //创建按钮状态
+    const buttonState = {buttonState:ButtonState.Init};//按钮初始状态
+
+    rect.buttonState = buttonState;//挂载上去
+
+    //分配id给按钮控件
+    const id = getID();
+    rect.id = id;
+
+    //将id和渲染对象绑定
+    setId2renderTree(id, rect);
+
+    //添加状态改变处理对象
+    const stateChanged:any = {};
+
+    stateChanged.handle = stateChangedHandle;
+    stateChanged.buttonState = buttonState;
+    stateChanged.do = [];//按钮状态改变需要处理的工作
+
+    rect.stateChanged = stateChanged;
+
+    //添加鼠标按下事件处理函数
+    rect.mousedown = function()
+    {
+        //console.log("button", id, "mousedown");
+
+        //改变按钮状态
+        rect.buttonState.buttonState = ButtonState.Down;
+
+        if (rect.stateChanged)
+        {
+            const func = rect.stateChanged.handle;
+
+            func(rect.stateChanged);
+        }
+    };
+
+    rect.mouseup = function()
+    {
+        //改变按钮状态
+        rect.buttonState.buttonState = ButtonState.Init;
+
+        if (rect.stateChanged)
+        {
+            const func = rect.stateChanged.handle;
+
+            func(rect.stateChanged);
+        }
+    };
+    ////////////////////////////////////
+
+
+
     //取得默认的按钮模版，来设置按钮的渲染函数
     rect.draw = drawLayoutRect;//画出布局框
 
@@ -230,13 +419,18 @@ function layoutButton(parent:any, button:any)
     const buttonSolidBackgroundIndex = buttonTemplate_.elements[0].attributes['ref.Style'];
 
     //拿着Index去style文件中寻找颜色。
-    const buttonSolidBackgroundColor = style(buttonSolidBackgroundIndex);
+    const buttonSolidBackgroundColor = style(rect.buttonState.buttonState, buttonSolidBackgroundIndex);
+
+    const buttonSolidBackgroundColorObj:any = {color:buttonSolidBackgroundColor};
+
+    stateChanged.do.push(new DoWork('color', buttonSolidBackgroundIndex, 
+                                    buttonSolidBackgroundColorObj)); 
 
     if (buttonSolidBackgroundColor)
     {
         const obj = {
             draw:drawBackground,
-            color:buttonSolidBackgroundColor,
+            color:buttonSolidBackgroundColorObj,
         };
         
         rect.children.push(obj);
@@ -260,25 +454,31 @@ function layoutButton(parent:any, button:any)
     //然后获得bounds的内部的SolidBorder
     const solidBoarderIndex = bounds.elements[0].attributes['ref.Style'];
 
-    const solidBoarderColor = style(solidBoarderIndex);
+    const solidBoarderColor = style(rect.buttonState.buttonState, solidBoarderIndex);
+
+    const solidBoarderColorObj:any = {color:solidBoarderColor};
+
+    stateChanged.do.push(new DoWork('color', solidBoarderIndex, 
+                                    solidBoarderColorObj)); 
 
     if (solidBoarderColor)
     {
         const obj = {
             draw:drawsolidBoarder,
-            color:solidBoarderColor,
+            color:solidBoarderColorObj,
         };
         
         boundsRect.children.push(obj);
     }
 
+    //rect.mousedown();
 }
 
 function drawsolidBoarder(color:any, rect:any)
 {
     if (drawCtx)
     {
-        drawCtx.strokeStyle = color;
+        drawCtx.strokeStyle = color.color;
         drawCtx.strokeRect(rect.left, rect.top, rect.width, rect.height);
     }
 }
@@ -288,21 +488,36 @@ function drawBackground(color:any, rect:any)
     //背景色为填充方块
     if (drawCtx)
     {
-        drawCtx.fillStyle=color;
+        drawCtx.fillStyle=color.color;
         drawCtx.fillRect(rect.left, rect.top, rect.width, rect.height);
     }
 }
 
-function style(index:string)
+function style(state:any, index:string)
 {
-    if (index == 'buttonBackground')
+    if (state == ButtonState.Init)
     {
-        return '#3F3F46';
+        if (index == 'buttonBackground')
+        {
+            return '#3F3F46';
+        }
+    
+        if (index == 'buttonBorder')
+        {
+            return '#54545C';
+        }
     }
-
-    if (index == 'buttonBorder')
+    else if (state == ButtonState.Down)
     {
-        return '#54545C';
+        if (index == 'buttonBackground')
+        {
+            return '#007ACC';
+        }
+    
+        if (index == 'buttonBorder')
+        {
+            return '#1C97EA';
+        }
     }
 
     return undefined;

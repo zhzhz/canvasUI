@@ -132,6 +132,17 @@ export function fillUpControlArray(left:number, top:number, width:number, height
 
 export function getControlID(mouse:any)
 {
+    //console.log("mouse.x", mouse.x, "mouse.y", mouse.y);
+    if (mouse.x > canvasInfo.width - 1)
+    {
+        mouse.x = canvasInfo.width - 1;
+    }
+
+    if (mouse.y > canvasInfo.height - 1)
+    {
+        mouse.y = canvasInfo.height - 1;
+    }
+
     return upControl[mouse.x][mouse.y];
 }
 

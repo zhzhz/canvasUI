@@ -1,3 +1,8 @@
+//declare function initLua(): any;
+// declare const require:any
+
+// const lua = require("../lib/lua.js");
+import {initLua, luaParse, runLua} from '../lib/lua';
 
 import {setRootLayout, layout, getLayoutTree} from './layout';
 import {getID, fillUpControlArray, getControlID, id2renderTree, setId2renderTree} from './global';
@@ -67,7 +72,7 @@ function handleMouseDown(mouse:any)
     //鼠标按下，更新按钮的显示状态
     //查找按下的是哪个控件
     const controlID = getControlID(mouse);
-    //console.log(controlID);
+    console.log(controlID);
 
     //根据控件id得到控件渲染树节点
     const renderTreeNode = id2renderTree(controlID);
@@ -299,10 +304,7 @@ function stateChangedHandle(info:any)
         if (doWork.type == 'color')
         {
             //处理color更新
-            const color = style(info.buttonState.buttonState, doWork.index);
-            //console.log("stateChangedHandle color", color);
-            //更新渲染树的color
-            doWork.color.color = color;
+            style(info.buttonState.buttonState, doWork.index, doWork.color);
         }
     }
 
@@ -419,14 +421,16 @@ function layoutButton(parent:any, button:any)
     const buttonSolidBackgroundIndex = buttonTemplate_.elements[0].attributes['ref.Style'];
 
     //拿着Index去style文件中寻找颜色。
-    const buttonSolidBackgroundColor = style(rect.buttonState.buttonState, buttonSolidBackgroundIndex);
+    const buttonSolidBackgroundColorObj:any = {color:''};
 
-    const buttonSolidBackgroundColorObj:any = {color:buttonSolidBackgroundColor};
+    style(rect.buttonState.buttonState, buttonSolidBackgroundIndex,
+                                    buttonSolidBackgroundColorObj);
 
+    
     stateChanged.do.push(new DoWork('color', buttonSolidBackgroundIndex, 
                                     buttonSolidBackgroundColorObj)); 
 
-    if (buttonSolidBackgroundColor)
+    if (buttonSolidBackgroundColorObj.color)
     {
         const obj = {
             draw:drawBackground,
@@ -454,14 +458,15 @@ function layoutButton(parent:any, button:any)
     //然后获得bounds的内部的SolidBorder
     const solidBoarderIndex = bounds.elements[0].attributes['ref.Style'];
 
-    const solidBoarderColor = style(rect.buttonState.buttonState, solidBoarderIndex);
+    const solidBoarderColorObj:any = {color:''};
 
-    const solidBoarderColorObj:any = {color:solidBoarderColor};
+    style(rect.buttonState.buttonState, solidBoarderIndex, solidBoarderColorObj);
 
+    
     stateChanged.do.push(new DoWork('color', solidBoarderIndex, 
                                     solidBoarderColorObj)); 
 
-    if (solidBoarderColor)
+    if (solidBoarderColorObj.color)
     {
         const obj = {
             draw:drawsolidBoarder,
@@ -493,34 +498,80 @@ function drawBackground(color:any, rect:any)
     }
 }
 
-function style(state:any, index:string)
-{
-    if (state == ButtonState.Init)
-    {
-        if (index == 'buttonBackground')
-        {
-            return '#3F3F46';
-        }
+// function style(state:any, index:string)
+// {
+//     if (state == ButtonState.Init)
+//     {
+//         if (index == 'buttonBackground')
+//         {
+//             return '#3F3F46';
+//         }
     
-        if (index == 'buttonBorder')
-        {
-            return '#54545C';
-        }
-    }
-    else if (state == ButtonState.Down)
-    {
-        if (index == 'buttonBackground')
-        {
-            return '#007ACC';
-        }
+//         if (index == 'buttonBorder')
+//         {
+//             return '#54545C';
+//         }
+//     }
+//     else if (state == ButtonState.Down)
+//     {
+//         if (index == 'buttonBackground')
+//         {
+//             return '#007ACC';
+//         }
     
-        if (index == 'buttonBorder')
-        {
-            return '#1C97EA';
-        }
-    }
+//         if (index == 'buttonBorder')
+//         {
+//             return '#1C97EA';
+//         }
+//     }
 
-    return undefined;
+//     return undefined;
+// }
+
+function style(state:any, index:string, color:any)
+{
+    //1.读取BlackStyle.xml文件
+    const buttonTemplate = xml2js('BlackStyle.xml');
+
+    //console.log("style", index, buttonTemplate);
+
+    //2.建立lua环境
+    const ls = initLua();
+
+    //3.注入按钮状态
+    ls.pushInteger(state);//入栈一个整数
+    ls.setGlobal('buttonState');
+
+    //4.注入颜色属性
+    const Color = {
+        type:'color',
+        color:color,
+    };
+
+    ls.pushInteger(Color);//入栈一个整数
+    ls.setGlobal('Color');
+
+    //5.根据index的不同，调用不同的lua脚本语言
+    if (index == 'buttonBackground')
+    {
+        const buttonBackgroundCode = buttonTemplate.elements[0].elements[0]
+                                .elements[0].cdata;
+        
+        luaParse(buttonBackgroundCode);
+
+        //运行函数
+        runLua();
+    }
+    else if (index == 'buttonBorder')
+    {
+        const buttonBorderCode = buttonTemplate.elements[1].elements[0]
+        .elements[0].cdata;
+
+        luaParse(buttonBorderCode);
+
+        //运行函数
+        runLua();
+    }
 }
 
 

@@ -3,24 +3,24 @@
 <Style ref.Path="//*.buttonBackground">
   <att.Color-bind>
     <![CDATA[
-        if(buttonState == 0)
-        then
-            setValue(Color, "#3F3F46")
-        else
-            setValue(Color, "#007ACC")
-        end
+      cast Color let state = self.State in (
+        not self.VisuallyEnabled ? "#252526" :
+        state == ButtonState::Active ? "#54545C" :
+        state == ButtonState::Pressed ? "#007ACC" :
+        "#3F3F46"
+      )
     ]]>
   </att.Color-bind>
 </Style>
 <Style ref.Path="//*.buttonBorder">
   <att.Color-bind>
     <![CDATA[
-        if(buttonState == 0)
-        then
-            setValue(Color, "#54545C")
-        else
-            setValue(Color, "#1C97EA")
-        end
+      cast Color let state = self.State in (
+        not self.VisuallyEnabled ? "#434346" :
+        state == ButtonState::Active ? "#6A6A75" :
+        state == ButtonState::Pressed ? "#1C97EA" :
+        "#54545C"
+      )
     ]]>
   </att.Color-bind>
 </Style>

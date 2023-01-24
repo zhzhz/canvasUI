@@ -10,7 +10,6 @@
     "jsx": "preserve",
     "types": ["node"],
     "baseUrl": ".",
-    //"allowJs": true,
     "paths": {
       "#preload": ["../preload/src/index"],
       "/@/*": ["./src/*"]
@@ -23,6 +22,6 @@
     "src/**/*.tsx",
     "types/**/*.d.ts",
     "../../types/**/*.d.ts"
-, "types/lua.d.ts.bak"  ],
+  ],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"]
 }

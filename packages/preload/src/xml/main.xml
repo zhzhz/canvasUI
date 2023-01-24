@@ -11,4 +11,8 @@
     <Button Text="Button3">
     <att.BoundsComposition-set AlignmentToParent="left:0 top:-1 right:0 bottom:0" PreferredMinSize="x:100 y:30"/>
     </Button>
+
+    <Label Text="Button1">
+    </Label>
+
 </Window>

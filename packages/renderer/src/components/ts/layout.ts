@@ -11,6 +11,7 @@ const layoutFuncMap = new Map();
 layoutFuncMap.set('att.ContainerComposition-set', layoutContainerComposition);
 layoutFuncMap.set('Button', layoutButton);
 layoutFuncMap.set('Bounds', layoutBounds);
+layoutFuncMap.set('SolidLabel', layoutSolidLabel);
 
 //布局window和InternalMargin
 function layoutInternalMargin(parentItem:any, childItem:any)
@@ -142,6 +143,37 @@ function layoutContainerComposition(parentItem:any, childItem:any)
     return rect;
 }
 
+//布局solidLabel
+function layoutSolidLabel(parentItem:any, childItem:any)
+{
+    console.log('layoutSolidLabel', parentItem, childItem);
+    //根据childItem的指示布局
+    //只考虑居中的情况
+    const rect = layoutHandVCenter(parentItem, childItem);
+
+    parentItem.children.push(rect);
+
+    xml2renderMap.set(childItem, rect);
+
+    return rect;
+}
+
+function layoutHandVCenter(parentItem:any, childItem:any)
+{
+    //将字布局在parent的水平和垂直中心
+    const parentLeft = parentItem.left, 
+    parentTop = parentItem.top, 
+    parentWidth = parentItem.width,
+    parentHeight = parentItem.height;
+
+    const left = Math.ceil(parentLeft + (parentWidth - childItem.actualWidth)/2);
+    const top = Math.ceil(parentTop + (parentHeight - childItem.actualHeight)/2);
+
+    return {left, top, width:Math.ceil(childItem.actualWidth), 
+        height:Math.ceil(childItem.actualHeight)};
+}
+
+
 //按钮布局在parentItem的containerComposition内
 function layoutButton(parentItem:any, childItem:any)
 {
@@ -160,7 +192,9 @@ function layoutButton(parentItem:any, childItem:any)
 function layoutBounds(parentItem:any, childItem:any)
 {
     console.log('layoutBounds', parentItem, childItem);
-    return layoutInternalMargin(parentItem, childItem.AlignmentToParent);
+    const rect = layoutInternalMargin(parentItem, childItem.AlignmentToParent);
+    xml2renderMap.set(childItem, rect);
+    return rect;
 }
 
 export function layout(parentLayoutItem:any, childLayoutItem:any)
@@ -168,7 +202,7 @@ export function layout(parentLayoutItem:any, childLayoutItem:any)
     //根据父矩形布局
     //返回布局后的新矩形
     const parentItem = xml2renderMap.get(parentLayoutItem);
-    //console.log(parentItem)
+    //console.log("layout", parentItem);
     if (parentItem)
     {
         const layoutFunc = layoutFuncMap.get(childLayoutItem.name);

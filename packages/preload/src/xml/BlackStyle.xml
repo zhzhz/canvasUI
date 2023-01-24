@@ -27,12 +27,12 @@
 <Style ref.Path="//*.buttonText">
   <att.Color-bind>
     <![CDATA[
-      cast Color let state = self.State in (
-        not self.VisuallyEnabled ? "#6D6D6D" :
-        state == ButtonState::Active ? "#F1F1F1" :
-        state == ButtonState::Pressed ? "#FFFFFF" :
-        "#F1F1F1"
-      )
+        if(buttonState == 0)
+        then
+            setValue(Color, "#F1F1F1")
+        else
+            setValue(Color, "#00FF00")
+        end
     ]]>
   </att.Color-bind>
 </Style>

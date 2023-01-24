@@ -94,7 +94,7 @@ export function render(root:any, canvas:HTMLCanvasElement|undefined, ctx:CanvasR
 
     layoutWindow(window, canvas);
 
-    layoutElements(window, window.elements);
+    layoutElements(window, window.elements, null);
 
     whoClick(canvas);
 
@@ -248,12 +248,18 @@ function layoutWindow(window:any, canvas:HTMLCanvasElement|undefined)
 const renderMap = new Map();
 renderMap.set('att.ContainerComposition-set', layoutContainerComposition);
 renderMap.set('Button', layoutButton);
+renderMap.set('SolidLabel', layoutSolidLabel);
 
 function drawLayoutRect(rect:any)
 {
     //如果是按钮，则操作fillUpControlArray
     //console.log("drawLayoutRect", rect);
     if (rect.buttonState)
+    {
+        fillUpControlArray(rect.left, rect.top, rect.width, rect.height, rect.id);
+    }
+
+    if (rect.LabelState)
     {
         fillUpControlArray(rect.left, rect.top, rect.width, rect.height, rect.id);
     }
@@ -271,7 +277,7 @@ function drawLayoutRect(rect:any)
     }
 }
 
-function layoutContainerComposition(parent:any, child:any)
+function layoutContainerComposition(parent:any, child:any, context)
 {
     //console.log("drawContainerComposition");
     //计算布局框
@@ -334,7 +340,75 @@ class DoWork
     }
 }
 
-function layoutButton(parent:any, button:any)
+function layoutSolidLabel(parent:any, solidLabel:any, context:any)
+{
+    //提取出xml文件内容，以便layout函数中使用
+    const HorizontalAlignment = solidLabel.attributes.HorizontalAlignment;
+    const VerticalAlignment = solidLabel.attributes.VerticalAlignment;
+    
+    solidLabel.HorizontalAlignment = HorizontalAlignment;
+    solidLabel.PreferredMinSizeParam = VerticalAlignment;
+
+    //console.log("layoutSolidLabel3",parent, solidLabel);
+
+    //根据文字计算出文字的宽和高
+    if (drawCtx)
+    {
+        drawCtx.font = '20px Arial';
+        const metrics = drawCtx.measureText(context.Text);
+        //let fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+        const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+        solidLabel.actualHeight = actualHeight;
+        solidLabel.actualWidth= metrics.width;
+
+        const rect = layout(parent, solidLabel);
+        rect.Text = context.Text;
+        
+        rect.LabelState = {};//为了填充二维UpControlArray
+        //根据rect，计算text的左下脚坐标
+        rect.draw = drawLayoutRect;//画出布局框
+        rect.children = [];
+
+        //分配id给按钮控件
+        const id = getID();
+        rect.id = id;
+
+        //将id和渲染对象绑定
+        setId2renderTree(id, rect);
+
+        //计算文本的颜色并绑定绘图函数
+        const solidLabelIndex = solidLabel.attributes['ref.Style'];
+
+        const solidLabelColorObj:any = {color:''};
+
+        style(context.buttonState.buttonState, solidLabelIndex, solidLabelColorObj);
+
+        context.stateChanged.do.push(new DoWork('color', solidLabelIndex, 
+                                solidLabelColorObj)); 
+
+        if (solidLabelColorObj.color)
+        {
+            const obj = {
+                draw:(color:any, rect:any) => {
+                    const left = rect.left;
+                    const bottom = rect.top + rect.height;
+
+                    if (drawCtx)
+                    {
+                        drawCtx.fillStyle = color.color;
+                        drawCtx.fillText(rect.Text, left, bottom);
+                    } 
+                },
+                color:solidLabelColorObj,
+            };
+            
+            rect.children.push(obj);
+        }
+    } 
+}
+
+function layoutButton(parent:any, button:any, context:any)
 {
     //console.log("drawButton");
     //计算按钮位置，画按钮所占的矩形
@@ -357,6 +431,9 @@ function layoutButton(parent:any, button:any)
     const buttonState = {buttonState:ButtonState.Init};//按钮初始状态
 
     rect.buttonState = buttonState;//挂载上去
+
+    //rect.Text = "buttom";
+    rect.Text = button.attributes.Text;
 
     //分配id给按钮控件
     const id = getID();
@@ -476,7 +553,25 @@ function layoutButton(parent:any, button:any)
         boundsRect.children.push(obj);
     }
 
-    //rect.mousedown();
+    //2.3处理标签
+    //首先是取得textBounds，这个是用来布局的
+    const textBounds = buttonTemplate_.elements[3];
+    let textBoundsAttributes = textBounds.attributes.AlignmentToParent;
+
+    textBoundsAttributes = str2obj(textBoundsAttributes);
+    textBounds.AlignmentToParent = textBoundsAttributes;
+
+    //父窗口是按钮，子窗口是textBounds 
+    const textBoundsRect = layout(button, textBounds);
+
+    textBoundsRect.draw = drawLayoutRect;//画出布局框
+
+    textBoundsRect.children = [];
+
+    rect.children.push(textBoundsRect);
+
+    //textBounds中是solidLabel控件
+    layoutElements(textBounds, textBounds.elements, rect);
 }
 
 function drawsolidBoarder(color:any, rect:any)
@@ -572,11 +667,21 @@ function style(state:any, index:string, color:any)
         //运行函数
         runLua();
     }
+    else if (index == 'buttonText')
+    {
+        const buttonTextCode = buttonTemplate.elements[2].elements[0]
+        .elements[0].cdata;
+
+        luaParse(buttonTextCode);
+
+        //运行函数
+        runLua();
+    }
 }
 
 
 //布局window中的可视元素
-function layoutElements(window:any, elements:Array<any>)
+function layoutElements(window:any, elements:Array<any>, context:any)
 {
     //暂时不支持修改canvas大小
     //1.渲染ContainerComposition
@@ -587,7 +692,7 @@ function layoutElements(window:any, elements:Array<any>)
 
         if (layoutFunc)
         {
-            layoutFunc(window, elements[i]);
+            layoutFunc(window, elements[i], context);
         }
     }
 }

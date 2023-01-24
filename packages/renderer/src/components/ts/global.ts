@@ -5,7 +5,7 @@ export function getID()
     return ++idCnt;
 }
 
-const upControl = [];
+const upControl:any = [];
 
 //canvas的描述参数
 

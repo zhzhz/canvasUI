@@ -1,3 +1,7 @@
+import {drawCtx} from './render';
+import {xml2js} from '#preload';
+import {initLua, luaParse, runLua} from '../lib/lua';
+
 //得到控件的全局id号
 let idCnt = -1;
 export function getID()
@@ -156,4 +160,189 @@ export function id2renderTree(id:number)
 export function setId2renderTree(id:number, tree:any)
 {
     id2renderTreeArray[id] = tree;
+}
+
+export function str2obj(str:string)
+{
+    //以空格分隔每个属性
+    const obj:any = {};
+
+    let count = 0;
+
+    for (;;)
+    {
+        //跳过可能的空格
+        while (str[count] == ' ')
+        {
+            count++; 
+        }
+
+        if (count == str.length)
+        {
+            break;
+        }
+
+        //找到属性名
+        const strStart = count;
+
+        while(str[count] != ':' && str[count] != ' ')
+        {
+            count++; 
+        }
+
+        const strEnd = count;
+
+        const attrName = str.substring(strStart, strEnd);
+
+        //找到属性值
+        //跳过可能的空格
+        while (str[count] == ' ' || str[count] == ':')
+        {
+            count++; 
+        }
+
+        const strStart2 = count;
+
+        while (str[count] != ' ' && count != str.length)
+        {
+            count++; 
+        }
+
+        const strEnd2 = count;
+
+        const attrValue = str.substring(strStart2, strEnd2);
+
+        obj[attrName] = attrValue;
+        //console.log(attrName, attrValue);
+
+        //跳过可能的空格
+        while (str[count] == ' ')
+        {
+            count++; 
+        }
+
+        if (count == str.length)
+        {
+            break;
+        }
+    }
+
+    return obj;
+}
+
+
+export function drawLayoutRect(rect:any)
+{
+    //如果是按钮，则操作fillUpControlArray
+    //console.log("drawLayoutRect", rect);
+    if (rect.buttonState)
+    {
+        fillUpControlArray(rect.left, rect.top, rect.width, rect.height, rect.id);
+    }
+
+    if (rect.labelState)
+    {
+        fillUpControlArray(rect.left, rect.top, rect.width, rect.height, rect.id);
+    }
+
+    if (drawCtx == null)
+    {
+        return;
+    }
+
+    //drawCtx.fillStyle='#FF0000';
+    if (rect.left && rect.top && rect.width && rect.height)
+    {
+        drawCtx.strokeStyle = '#FF0000';
+        drawCtx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+    }
+}
+
+export function style(state:any, index:string, color:any)
+{
+    //1.读取BlackStyle.xml文件
+    const buttonTemplate = xml2js('BlackStyle.xml');
+
+    //console.log("style", index, buttonTemplate);
+
+    //2.建立lua环境
+    const ls = initLua();
+
+    //3.注入按钮状态
+    ls.pushInteger(state);//入栈一个整数
+    ls.setGlobal('buttonState');
+
+    //4.注入颜色属性
+    const Color = {
+        type:'color',
+        color:color,
+    };
+
+    ls.pushInteger(Color);//入栈一个整数
+    ls.setGlobal('Color');
+
+    //5.根据index的不同，调用不同的lua脚本语言
+    if (index == 'buttonBackground')
+    {
+        const buttonBackgroundCode = buttonTemplate.elements[0].elements[0]
+                                .elements[0].cdata;
+        
+        luaParse(buttonBackgroundCode);
+
+        //运行函数
+        runLua();
+    }
+    else if (index == 'buttonBorder')
+    {
+        const buttonBorderCode = buttonTemplate.elements[1].elements[0]
+        .elements[0].cdata;
+
+        luaParse(buttonBorderCode);
+
+        //运行函数
+        runLua();
+    }
+    else if (index == 'buttonText')
+    {
+        const buttonTextCode = buttonTemplate.elements[2].elements[0]
+        .elements[0].cdata;
+
+        luaParse(buttonTextCode);
+
+        //运行函数
+        runLua();
+    }
+}
+
+export class DoWork
+{
+    type:any;
+    index:any;
+    color:any;
+
+    constructor(type:any, index:any, color:any)
+    {
+        this.type = type;
+        this.index = index;
+        this.color = color;
+    }
+}
+
+export function drawBackground(color:any, rect:any)
+{
+    //背景色为填充方块
+    if (drawCtx)
+    {
+        drawCtx.fillStyle=color.color;
+        drawCtx.fillRect(rect.left, rect.top, rect.width, rect.height);
+    }
+}
+
+export function drawsolidBoarder(color:any, rect:any)
+{
+    if (drawCtx)
+    {
+        drawCtx.strokeStyle = color.color;
+        drawCtx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+    }
 }

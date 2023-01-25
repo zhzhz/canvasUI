@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Instance ref.CodeBehind="false" ref.Class="darkskin::LabelTemplate" ref.Styles="res://DarkSkin/Style">
+    <LabelTemplate ref.Name="self" DefaultTextColor="#000000" MinSizeLimitation="LimitToElementAndChildren">
+        <SolidLabel Text-bind="self.Text" Font-bind="self.Font">
+            <att.Color-bind>
+            <![CDATA[
+                cast Color (
+                not self.VisuallyEnabled ? "#6D6D6D" :
+                self.TextColor
+                )
+            ]]>
+            </att.Color-bind>
+        </SolidLabel>
+    </LabelTemplate>
+</Instance>

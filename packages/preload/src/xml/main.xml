@@ -12,7 +12,11 @@
     <att.BoundsComposition-set AlignmentToParent="left:0 top:-1 right:0 bottom:0" PreferredMinSize="x:100 y:30"/>
     </Button>
 
-    <Label Text="Button1">
+    <Label Text="This is a Label 1!">
+    <att.BoundsComposition-set AlignmentToParent="left:100 top:100 right:-1 bottom:-1"/>
     </Label>
 
+    <Label Text="This is a Label 2!">
+    <att.BoundsComposition-set AlignmentToParent="left:0 top:200 right:-1 bottom:-1"/>
+    </Label>
 </Window>

@@ -12,6 +12,7 @@ layoutFuncMap.set('att.ContainerComposition-set', layoutContainerComposition);
 layoutFuncMap.set('Button', layoutButton);
 layoutFuncMap.set('Bounds', layoutBounds);
 layoutFuncMap.set('SolidLabel', layoutSolidLabel);
+layoutFuncMap.set('Label', layoutLabel);
 
 //布局window和InternalMargin
 function layoutInternalMargin(parentItem:any, childItem:any)
@@ -146,10 +147,61 @@ function layoutContainerComposition(parentItem:any, childItem:any)
 //布局solidLabel
 function layoutSolidLabel(parentItem:any, childItem:any)
 {
-    console.log('layoutSolidLabel', parentItem, childItem);
+    //console.log('layoutSolidLabel', parentItem, childItem);
+    //根据childItem的指示布局
+    if (childItem.HorizontalAlignment && childItem.VerticalAlignment)
+    {
+        //按钮中的文本
+        const rect = layoutHandVCenter(parentItem, childItem);
+
+        parentItem.children.push(rect);
+    
+        xml2renderMap.set(childItem, rect);
+
+        return rect;
+    }
+    else
+    {
+        //独立的文本
+        //由parent的left，top和child的width和height构成
+        const rect = layoutLTWH(parentItem, childItem);
+
+        parentItem.children.push(rect);
+    
+        xml2renderMap.set(childItem, rect);
+
+        return rect;
+    }
+}
+
+function layoutLTWH(parentItem:any, childItem:any)
+{
+    return {left:parentItem.left, top:parentItem.top,
+    width:Math.ceil(childItem.actualWidth), height:Math.ceil(childItem.actualHeight)};
+}
+
+function layoutLeftTop(parentItem:any, AlignmentToParent:any)
+{
+    const AlignmentLeft = Number(AlignmentToParent.left);
+    const AlignmentRight = Number(AlignmentToParent.right);
+    const AlignmentTop = Number(AlignmentToParent.top);
+    const AlignmentButtom = Number(AlignmentToParent.bottom);
+
+    const left = parentItem.left + AlignmentLeft;
+    const top = parentItem.top + AlignmentTop;
+    const width = -1;
+    const height = -1;
+
+    return {left, top, width, height};
+}
+
+function layoutLabel(parentItem:any, childItem:any)
+{
+    console.log('layoutLabel', parentItem, childItem);
     //根据childItem的指示布局
     //只考虑居中的情况
-    const rect = layoutHandVCenter(parentItem, childItem);
+    const rect = layoutLeftTop(parentItem.containerComposition, 
+        childItem.AlignmentToParent);
 
     parentItem.children.push(rect);
 

@@ -147,7 +147,7 @@ function layoutContainerComposition(parentItem:any, childItem:any)
 //布局solidLabel
 function layoutSolidLabel(parentItem:any, childItem:any)
 {
-    //console.log('layoutSolidLabel', parentItem, childItem);
+    console.log('layoutSolidLabel', parentItem, childItem);
     //根据childItem的指示布局
     if (childItem.HorizontalAlignment && childItem.VerticalAlignment)
     {
@@ -164,7 +164,10 @@ function layoutSolidLabel(parentItem:any, childItem:any)
     {
         //独立的文本
         //由parent的left，top和child的width和height构成
-        const rect = layoutLTWH(parentItem, childItem);
+        //const rect = layoutLTWH(parentItem, childItem);
+        const parent = xml2renderMap.get(parentItem.parentXml);
+        const rect = layoutAlignmentAndPreferred(parent.containerComposition, 
+            parentItem.AlignmentToParent, childItem.PreferredMinSize);
 
         parentItem.children.push(rect);
     
@@ -182,13 +185,10 @@ function layoutLTWH(parentItem:any, childItem:any)
 
 function layoutLeftTop(parentItem:any, AlignmentToParent:any)
 {
-    const AlignmentLeft = Number(AlignmentToParent.left);
-    const AlignmentRight = Number(AlignmentToParent.right);
-    const AlignmentTop = Number(AlignmentToParent.top);
-    const AlignmentButtom = Number(AlignmentToParent.bottom);
-
-    const left = parentItem.left + AlignmentLeft;
-    const top = parentItem.top + AlignmentTop;
+    // const left = parentItem.left + AlignmentLeft;
+    // const top = parentItem.top + AlignmentTop;
+    const left = -1;
+    const top = -1;
     const width = -1;
     const height = -1;
 

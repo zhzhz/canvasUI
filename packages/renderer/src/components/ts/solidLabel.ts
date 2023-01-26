@@ -87,9 +87,15 @@ function layoutSolidLabelForLabel(parent:any, solidLabel:any, context:any)
         solidLabel.actualHeight = actualHeight;
         solidLabel.actualWidth= metrics.width;
 
+        solidLabel.PreferredMinSize = {};
+        solidLabel.PreferredMinSize.x = solidLabel.actualWidth;
+        solidLabel.PreferredMinSize.y = solidLabel.actualHeight;
+
         const rect = layout(parent, solidLabel);
 
-        //根据solidLabel更新label控件的宽和高
+        //根据solidLabel更新label控件的左上角，宽和高
+        context.left = rect.left;
+        context.top = rect.top;
         context.width = rect.width;
         context.height = rect.height;
 
@@ -110,7 +116,6 @@ function layoutSolidLabelForLabel(parent:any, solidLabel:any, context:any)
 
                 if (drawCtx)
                 {
-                    //todo:字需要清除一下canvas，不然字会变粗
                     drawCtx.font = rect.font;
                     drawCtx.fillStyle = color.color;
                     drawCtx.fillText(rect.Text, left, bottom);

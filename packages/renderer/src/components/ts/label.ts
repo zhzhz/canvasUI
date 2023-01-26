@@ -9,15 +9,21 @@ import {xml2js} from '#preload';
 export function layoutLabel(parent:any, label:any, context:any)
 {
     //解析得到标签的文字,计算文字的宽和高
+    //console.log("layoutLabel", parent);
     const Text = label.attributes.Text;
 
     const AlignmentToParent = label.elements[0].attributes.AlignmentToParent;
     
     const AlignmentToParentParam = str2obj(AlignmentToParent);
 
-    label.AlignmentToParent = AlignmentToParentParam;
+    //label.AlignmentToParent = AlignmentToParentParam;
 
     const rect = layout(parent, label);
+
+    //将parent记录下来，便于在solidLabel中计算方框
+    //这里得到的rect是无效的。
+    rect.parentXml = parent;
+    rect.AlignmentToParent = AlignmentToParentParam;
 
     rect.draw = drawLayoutRect;
 

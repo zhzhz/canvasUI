@@ -54,8 +54,8 @@ function layoutAlignmentAndPreferred(parentItem:any,
     const AlignmentTop = Number(AlignmentToParent.top);
     const AlignmentButtom = Number(AlignmentToParent.bottom);
 
-    const PreferredX = Number(PreferredMinSize.x);
-    const PreferredY = Number(PreferredMinSize.y);
+    const PreferredX = Math.ceil(Number(PreferredMinSize.x));
+    const PreferredY = Math.ceil(Number(PreferredMinSize.y));
 
     let left,top,width,height;
 

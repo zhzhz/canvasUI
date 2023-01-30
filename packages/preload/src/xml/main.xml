@@ -13,7 +13,7 @@
     </Button>
 
     <Label Text="This is a Label 1!">
-    <att.BoundsComposition-set AlignmentToParent="left:100 top:100 right:-1 bottom:-1"/>
+    <att.BoundsComposition-set AlignmentToParent="left:-1 top:100 right:0 bottom:-1"/>
     </Label>
 
     <Label Text="This is a Label 2!">

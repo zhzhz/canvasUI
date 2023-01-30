@@ -1,4 +1,11 @@
-import {createApp} from 'vue';
 import App from '/@/App.vue';
 
-createApp(App).mount('#app');
+import { createApp } from './runtime-dom';
+import {getRootContainer} from './game';
+
+const app = createApp(App);
+app.mount(getRootContainer());
+
+
+
+

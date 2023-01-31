@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import MyCanvas from '/@/components/MyCanvas.vue';
+import MyCanvas from '/@/views/MyCanvas.vue';
 
 //const APP_VERSION = import.meta.env.VITE_APP_VERSION;
 </script>

@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
+    "strictFunctionTypes": false,  
+    "noImplicitAny": false,
     "module": "esnext",
     "target": "esnext",
     "sourceMap": false,
     "moduleResolution": "Node",
     "skipLibCheck": true,
-    "strict": true,
+    // "strict": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "types": ["node"],
@@ -22,6 +24,6 @@
     "src/**/*.tsx",
     "types/**/*.d.ts",
     "../../types/**/*.d.ts"
-  ],
+, "src/game/index.js", "src/core/index.js"  ],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"]
 }

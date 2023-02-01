@@ -3,8 +3,7 @@
   <graphics name="SolidBorder"></graphics>
 </template>
 
-<script setup="props,{emit}">
-//import bulletImg from '../../assets/bullet.png';
+<script setup="props,{emit}" lang="ts">
 
 </script>
 

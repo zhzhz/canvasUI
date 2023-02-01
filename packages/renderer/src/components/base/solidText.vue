@@ -1,7 +1,7 @@
 <template>
-  <!-- 画一个实心矩形 -->
-  <graphics name="SolidBackground">
-  </graphics>
+  <!-- 画文字 -->
+  <text name="SolidText">
+  </text>
 </template>
 
 <script setup="props,{emit}" lang="ts">

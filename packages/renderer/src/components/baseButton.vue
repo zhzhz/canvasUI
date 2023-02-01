@@ -1,10 +1,11 @@
 <template>
-  <container name="Button" :x="x" :y="y">
+  <container name="Button" :x="x" :y="y" @buttonDown="onButtonDown" 
+  @buttonUp="onButtonUp" :interactive="true">
     <!-- <sprite :texture="bulletImg"></sprite> -->
     
     <!-- 背景色 -->
     <SolidBackground
-      color="0x3F3F46"
+      :color="buttonColor.backgroundColor"
       :x=0
       :y=0
       :width="width"
@@ -14,7 +15,7 @@
     <!-- 边框 -->
     <!-- <SolidBorder :color=0x54545C ></SolidBorder> -->
     <SolidBorder
-      color="0xffffff"
+      :color="buttonColor.borderColor"
       :lineWidth="1"
       :x=0
       :y=0
@@ -24,7 +25,7 @@
 
     <!-- 按钮文字 -->
     <SolidText
-      color="0xF1F1F1"
+      :color="buttonColor.textColor"
       :text="text"
       :x="textXAndY.x"
       :y="textXAndY.y" 
@@ -37,8 +38,15 @@ import SolidBackground from './base/solidBackground.vue';
 import SolidBorder from './base/solidBorder.vue';
 import SolidText from './base/solidText.vue';
 import {ref, onMounted, reactive, computed} from 'vue';
-
 import { Text } from 'pixi.js';
+
+enum ButtonState 
+{
+  INIT,
+  MOUSE_DOWN
+}
+
+
 
 const props = defineProps<{
     x:any,
@@ -81,6 +89,49 @@ const textXAndY = computed(() => {
   //console.log("computed");
   return calcXY(text)
 });
+
+const calcColor = (buttonState) => {
+  if (buttonState.value == ButtonState.INIT)
+  {
+    return {
+      backgroundColor: '0x3F3F46',
+      borderColor: '0xffffff',
+      textColor: '0xF1F1F1'
+    };
+  }
+  else if (ButtonState.MOUSE_DOWN == buttonState.value)
+  {
+    //console.log("mousedown calcColor")
+    return {
+      backgroundColor: '0x007ACC',//0x007ACC
+      borderColor: '0x1C97EA',
+      textColor: '0x00FF00'
+    };
+  }
+}
+
+let buttonState = ref(ButtonState.INIT);
+
+const buttonColor = computed(()=>{
+  return calcColor(buttonState);
+});
+
+const onButtonDown = () =>{
+  //console.log("mouse down");
+  if (ButtonState.INIT == buttonState.value)
+  {
+    buttonState.value = ButtonState.MOUSE_DOWN;
+  }
+}
+
+const onButtonUp = () =>{
+  //console.log("mouse up");
+  if (ButtonState.MOUSE_DOWN == buttonState.value)
+  {
+    buttonState.value = ButtonState.INIT;
+  }
+}
+
 
 </script>
 

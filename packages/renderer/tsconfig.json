@@ -24,6 +24,6 @@
     "src/**/*.tsx",
     "types/**/*.d.ts",
     "../../types/**/*.d.ts"
-, "src/game/index.js", "src/core/index.js"  ],
+, "src/game/index.js", "src/core/index.ts"  ],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"]
 }

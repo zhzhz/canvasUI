@@ -10,6 +10,7 @@ class Rect
     color;
     lineWidth;
     text;
+    interactive;
 
     constructor()
     {
@@ -29,6 +30,7 @@ class Rect
         this.color = undefined;
         this.lineWidth = undefined;
         this.text = undefined;
+        this.interactive = undefined;
     }
 }
 
@@ -64,6 +66,10 @@ function fillRect(key, value)
 
     case 'text':
     rect.text = value;
+    break;
+
+    case 'interactive':
+    rect.interactive = value;
     break;
     
     default:
@@ -159,7 +165,7 @@ const renderer = createRenderer({
     {
         //console.log("patchProp", key, nextValue);
         //console.log("patchProp", key, nextValue);
-        console.log('SolidBackground');
+        //console.log('SolidBackground');
         if (graphFinish.get(el) == undefined ||
         graphFinish.get(el) == false)
         {
@@ -179,9 +185,32 @@ const renderer = createRenderer({
   
               //创建标志位，标志这个控件已经创建
               graphFinish.set(el, true);
+
+              //记录，为了修改颜色
+              el._color_ = rect.color;
+
+              el._x_ = rect.x;
+              el._y_ = rect.y;
+              el._width_ = rect.width;
+              el._height_ = rect.height;
+
               rect.clear();
           }
 
+          return;
+        }
+
+        if (key == 'color')
+        {
+          el.clear();
+          
+          el.beginFill(nextValue);
+          el.drawRect(el._x_+1, el._y_, el._width_, el._height_);
+          el.endFill();
+
+          el[key] = nextValue;
+
+          el._color_ = nextValue;
           return;
         }
     }
@@ -247,6 +276,17 @@ const renderer = createRenderer({
           el._height_ = nextValue;
           return;
         }
+        else if (key == 'color')
+        {
+          el.clear();
+          
+          el.lineStyle(el._lineWidth_, nextValue);
+          el.drawRect(el._x_+1, el._y_, el._width_, el._height_);
+          el[key] = nextValue;
+
+          el._color_ = nextValue;
+          return;
+        }
     }
     else if (el.name == 'SolidText')
     {
@@ -282,8 +322,14 @@ const renderer = createRenderer({
         // console.log(nextValue);
         el.texture = Texture.from(nextValue);
         break;
-      case 'onClick':
-        el.on('pointertap', nextValue);
+      case 'onButtonDown':
+        //console.log("onClick", nextValue, el.name);
+        el.on('pointerdown', nextValue);
+        break;
+
+      case 'onButtonUp':
+        //console.log("onClick", nextValue, el.name);
+        el.on('pointerup', nextValue);
         break;
 
       default:

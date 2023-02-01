@@ -22,7 +22,7 @@ const buttonInfo = useStore();
 
 onMounted(()=>{
 
-  //buttonInfo[2].width = 150;
+  //buttonInfo[2].width = 200;
   //buttonInfo[2].height = 50;
 
   // buttonInfo[2].x = 200;
